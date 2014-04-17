@@ -7,12 +7,15 @@
 package server;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -45,9 +48,9 @@ public class Server {
     private static class Clientes extends Thread{
         private Socket cliente=null;
         private PrintWriter os=null;
-        private String nombre;
-        private String dirIp;
-        private String puerto;
+        private String nombre="niko";
+        private String dirIp="123123";
+        private String puerto="8888";
         public Clientes(Socket cl) {
             cliente=cl;
         }
@@ -81,8 +84,13 @@ public class Server {
                         }
                         else if((st.countTokens()>=2)&&next.equals("POST")){
                             //database.setWritable(true);
-                            
-                            imprimirFichero(st.nextToken());
+                            next= st.nextToken();
+                            if(next.equals("/pag1.html")){
+                                retornaFichero(next);
+                            }
+                            else if(next.equals("/pag2.html")){
+                                imprimirFichero(next);
+                            }
                            // System.out.println(next);
                             //retornaFichero(st.nextToken());
                             //i=0;
@@ -159,11 +167,21 @@ public class Server {
         }
 
         private void imprimirFichero( String nextToken) {
-            File database = new File("Contacto.txt");
-            //crea archivo si no existe
-            if(!database.exists()){
+            Writer writer = null;
+
+            try {
                 
+                writer = new BufferedWriter(new OutputStreamWriter(
+                      new FileOutputStream("contactos.txt",true), "utf-8"));
+                        writer.write(nombre+ " ");
+                        writer.write(dirIp+ " ");
+                        writer.write(puerto+"\r\n");
+            } catch (IOException ex) {
+              // report
+            } finally {
+               try {writer.close();} catch (Exception ex) {}
             }
+            retornaFichero(nextToken);
             //lee archivo si no existe
             
         }
