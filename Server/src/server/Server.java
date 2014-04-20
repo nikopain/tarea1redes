@@ -1,25 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package server;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Date;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
 /**
  *
@@ -65,8 +48,7 @@ public class Server {
                 String next;
                 ruta=in.readLine();
                 do			
-                {
-                    
+                {                    
                     //ruta = in.readLine();
                     if(i == 0) // la primera linea nos dice que fichero hay que descargar
                     {
@@ -84,6 +66,36 @@ public class Server {
                         }
                         else if((st.countTokens()>=2)&&next.equals("POST")){
                             //database.setWritable(true);
+                            //System.out.println(next);
+                            imprimirFichero(st.nextToken());
+                            String currentLine =null;
+                            do{
+                                currentLine = in.readLine();
+                                //System.out.println(currentLine);                                   
+                                if((currentLine.indexOf("Content-Disposition:")) != -1){
+                                    if(currentLine.indexOf("nombre")!= -1){//REVISA SI TIENE EL NAME=NOMBRE PUESTO EN EL FORM DEL HTML
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        nombre=currentLine;
+                                        //System.out.println("nombre guardado");
+                                    }
+                                    else if(currentLine.indexOf("dirip")!= -1){//REVISA SI TIENE EL NAME=DIRIP PUESTO EN EL FORM DEL HTML
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        dirIp=currentLine;
+                                        //System.out.println("ip guardado");
+                                    }
+                                    else if(currentLine.indexOf("puerto")!= -1){//REVISA SI TIENE EL NAME=PUERTO PUESTO EN EL FORM DEL HTML
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        currentLine= in.readLine();//PARA SALTAR INFO INNECESARIA
+                                        puerto=currentLine;
+                                        //System.out.println("puerto guardado");
+                                    }
+                                }
+                            }while(in.ready());
+                            System.out.println(nombre);
+                            System.out.println(dirIp);
+                            System.out.println(puerto);
                             next= st.nextToken();
                             if(next.equals("/pag1.html")){
                                 retornaFichero(next);
@@ -166,7 +178,7 @@ public class Server {
 
         }
 
-        private void imprimirFichero( String nextToken) {
+        private void imprimirFichero(String nextToken) {
             Writer writer = null;
 
             try {
