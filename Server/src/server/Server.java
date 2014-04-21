@@ -31,9 +31,9 @@ public class Server {
     private static class Clientes extends Thread{
         private Socket cliente=null;
         private PrintWriter os=null;
-        private String nombre="niko";
-        private String dirIp="123123";
-        private String puerto="8888";
+        private String nombre;
+        private String dirIp;
+        private String puerto;
         public Clientes(Socket cl) {
             cliente=cl;
         }
@@ -67,7 +67,7 @@ public class Server {
                         else if((st.countTokens()>=2)&&next.equals("POST")){
                             //database.setWritable(true);
                             //System.out.println(next);
-                            imprimirFichero(st.nextToken());
+                            //imprimirFichero(st.nextToken());
                             String currentLine =null;
                             do{
                                 currentLine = in.readLine();
@@ -93,15 +93,15 @@ public class Server {
                                     }
                                 }
                             }while(in.ready());
-                            System.out.println(nombre);
-                            System.out.println(dirIp);
-                            System.out.println(puerto);
+                            //System.out.println(nombre);
+                            //System.out.println(dirIp);
+                            //System.out.println(puerto);
                             next= st.nextToken();
-                            if(next.equals("/pag1.html")){
+                            if(next.equals("/pag1.html")||next.equals("/pag2.html")){
                                 retornaFichero(next);
                             }
-                            else if(next.equals("/pag2.html")){
-                                imprimirFichero(next);
+                            else if(next.equals("/menu.html")){
+                                imprimirFichero(next,nombre,dirIp,puerto);
                             }
                            // System.out.println(next);
                             //retornaFichero(st.nextToken());
@@ -124,6 +124,7 @@ public class Server {
         void retornaFichero(String sfichero)
 	{
             // comprobamos si tiene una barra al principio
+            String opciones;
             if (sfichero.startsWith("/"))
             {
                     sfichero = sfichero.substring(1) ;
@@ -132,21 +133,55 @@ public class Server {
             // si la cadena esta vacia, no retorna el index.htm principal
             if (sfichero.endsWith("/") || sfichero.equals(""))
             {
-                    sfichero = sfichero + "index.htm" ;
+                    sfichero = sfichero + "menu.html" ;
             }
             try
             {
                 // Ahora leemos el fichero y lo retornamos
+                if(sfichero.equals("pag2.html")){
+                    String contactos="";
+                    File cont= new File("contactos.txt");
+                    if(cont.exists()){
+                        StringTokenizer s;
+                        BufferedReader fLocal= new BufferedReader(new FileReader(cont));
+                        String lin="";
+                        String comienzo="<html>\n" +
+"    <head>\n" +
+"        <title></title>\n" +
+"        <meta charset=\"UTF-8\">\n" +
+"        <meta name=\"viewport\" content=\"width=device-width\">\n" +
+"    </head>\n" +
+"    <body>\n" +
+"        <div>\n"+
+"           <select name=\"contactos\" multiple=\"multiple\">";
+                       while((lin=fLocal.readLine())!=null){
+                            s= new StringTokenizer(lin);
+                            contactos= contactos+"<option>"+ s.nextToken()+"</option>\n";
+                            
+                        }
+                        String fin= "</select>\n" +
+"        <textarea rows=\"5\" cols=\"50\"></textarea>    \n" +
+"        </div>\n" +
+"        <form method=\"POST\" action=\"pag1.html\">\n" +
+"            <input type=\"submit\" value=\"Agregar Contacto\">\n" +
+"        </form>\n" +
+"    </body>\n" +
+"</html>";
+                        os.println(comienzo+contactos+fin);
+                        fLocal.close();
+                        os.close();
+                    }
+                    else{
+                        os.println("HTTP/1.0 400 ok");
+                        os.close();
+                    }
+                    //System.out.println(contactos);
+                }
+                else{
                 File mifichero = new File(sfichero) ;
                 
                 if (mifichero.exists()) 
                 {
-                    os.println("HTTP/1.0 200 ok");
-                    os.println("Server: Roberto Server/1.0");
-                    os.println("Date: " + new Date());
-                    os.println("Content-Type: text/html");
-                    os.println("Content-Length: " + mifichero.length());
-                    os.println("\n");
 
                     BufferedReader ficheroLocal = new BufferedReader(new FileReader(mifichero));
                     String linea = "";
@@ -171,6 +206,7 @@ public class Server {
                     os.println("HTTP/1.0 400 ok");
                     os.close();
                 }
+                }
 
             }
             catch(Exception e){
@@ -178,16 +214,17 @@ public class Server {
 
         }
 
-        private void imprimirFichero(String nextToken) {
+        private void imprimirFichero(String nextToken,String nombre1,String dirIp1,String puerto1) {
             Writer writer = null;
 
             try {
                 
                 writer = new BufferedWriter(new OutputStreamWriter(
                       new FileOutputStream("contactos.txt",true), "utf-8"));
-                        writer.write(nombre+ " ");
-                        writer.write(dirIp+ " ");
-                        writer.write(puerto+"\r\n");
+                        writer.write("\r\n");
+                        writer.write(nombre1+ " ");
+                        writer.write(dirIp1+ " ");
+                        writer.write(puerto1);
             } catch (IOException ex) {
               // report
             } finally {
